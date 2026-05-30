@@ -3,4 +3,5 @@ tensorflow
 opencv-python
 flask
 numpy
-picamera2
+# picamera2
+RPi.GPIO
