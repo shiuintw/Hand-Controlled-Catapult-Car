@@ -6,8 +6,8 @@ import time
 # ==============================================
 IN1 = 17   # Left motor direction
 IN2 = 27   # Left motor direction
-IN3 = 22   # Right motor direction
-IN4 = 23   # Right motor direction
+IN3 = 23   # Right motor direction
+IN4 = 22   # Right motor direction
 
 # ==============================================
 # Setup
