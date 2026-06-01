@@ -1,6 +1,9 @@
 import RPi.GPIO as GPIO
 import time
 
+# ======================================================================================
+# Pin Config (BCM)
+# ======================================================================================
 SERVO_PIN = 12 # GPIO 18
 
 GPIO.setmode(GPIO.BOARD)
@@ -16,18 +19,22 @@ def set_angle(angle):
     time.sleep(0.5)
     pwm.ChangeDutyCycle(0)  # stop jitter
 
-try:
-    while True:
-        print("0 degrees")
-        set_angle(0)
-        time.sleep(1)
+# ======================================================================================
+# Test
+# ======================================================================================
+if __name__ == '__main__':
+    try:
+        while True:
+            print("0 degrees")
+            set_angle(0)
+            time.sleep(1)
 
-        print("170 degrees")
-        set_angle(170)
-        time.sleep(1)
+            print("170 degrees")
+            set_angle(170)
+            time.sleep(1)
 
-except KeyboardInterrupt:
-    pass
-finally:
-    pwm.stop()
-    GPIO.cleanup()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        pwm.stop()
+        GPIO.cleanup()

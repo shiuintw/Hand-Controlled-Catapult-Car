@@ -1,88 +1,115 @@
 import RPi.GPIO as GPIO
 import time
 
-# ==============================================
+# ======================================================================================
 # Pin Config (BCM)
-# ==============================================
+# ======================================================================================
 IN1 = 17   # Left motor direction
 IN2 = 27   # Left motor direction
 IN3 = 23   # Right motor direction
 IN4 = 22   # Right motor direction
+ENA = 12   # Left motor speed
+ENB = 13   # Right motor speed
 
-# ==============================================
+# ======================================================================================
 # Setup
-# ==============================================
+# ======================================================================================
 GPIO.setmode(GPIO.BCM)
-for pin in [IN1, IN2, IN3, IN4]:
+for pin in [IN1, IN2, IN3, IN4, ENA, ENB]:
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
 
-def forward():
+pwm_a = GPIO.PWM(ENA, 1000)
+pwm_b = GPIO.PWM(ENB, 1000)
+pwm_a.start(0)
+pwm_b.start(0)
+
+def set_speed(speed):
+    pwm_a.ChangeDutyCycle(speed)
+    pwm_b.ChangeDutyCycle(speed)
+
+def forward(speed=70):
+    set_speed(speed)
     GPIO.output(IN1, GPIO.HIGH)
     GPIO.output(IN2, GPIO.LOW)
     GPIO.output(IN3, GPIO.HIGH)
     GPIO.output(IN4, GPIO.LOW)
 
-def backward():
+def backward(speed=70):
+    set_speed(speed)
     GPIO.output(IN1, GPIO.LOW)
     GPIO.output(IN2, GPIO.HIGH)
     GPIO.output(IN3, GPIO.LOW)
     GPIO.output(IN4, GPIO.HIGH)
 
-def turn_left():
+def turn_left(speed=50):
+    set_speed(speed)
     GPIO.output(IN1, GPIO.LOW)
     GPIO.output(IN2, GPIO.HIGH)
     GPIO.output(IN3, GPIO.HIGH)
     GPIO.output(IN4, GPIO.LOW)
 
-def turn_right():
+def turn_right(speed=50):
+    set_speed(speed)
     GPIO.output(IN1, GPIO.HIGH)
     GPIO.output(IN2, GPIO.LOW)
     GPIO.output(IN3, GPIO.LOW)
     GPIO.output(IN4, GPIO.HIGH)
 
 def stop():
+    set_speed(0)
     for pin in [IN1, IN2, IN3, IN4]:
         GPIO.output(pin, GPIO.LOW)
 
-# ==============================================
+# ======================================================================================
 # Test
-# ==============================================
-try:
-    print("Forward")
-    forward()
-    time.sleep(2)
+# ======================================================================================
+if __name__ == '__main__':
+    try:
+        print("Forward 100%")
+        forward(100)
+        time.sleep(2)
 
-    print("Stop")
-    stop()
-    time.sleep(1)
+        print("Forward 50%")
+        forward(50)
+        time.sleep(2)
 
-    print("Backward")
-    backward()
-    time.sleep(2)
+        print("Forward 30%")
+        forward(30)
+        time.sleep(2)
 
-    print("Stop")
-    stop()
-    time.sleep(1)
+        print("Stop")
+        stop()
+        time.sleep(1)
 
-    print("Turn left")
-    turn_left()
-    time.sleep(2)
+        print("Backward 70%")
+        backward(70)
+        time.sleep(2)
 
-    print("Stop")
-    stop()
-    time.sleep(1)
+        print("Stop")
+        stop()
+        time.sleep(1)
 
-    print("Turn right")
-    turn_right()
-    time.sleep(2)
+        print("Turn left")
+        turn_left(50)
+        time.sleep(2)
 
-    print("Stop")
-    stop()
-    print("Done!")
+        print("Stop")
+        stop()
+        time.sleep(1)
 
-except KeyboardInterrupt:
-    pass
-finally:
-    stop()
-    GPIO.cleanup()
+        print("Turn right")
+        turn_right(50)
+        time.sleep(2)
+
+        print("Stop")
+        stop()
+        print("Done!")
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        pwm_a.stop()
+        pwm_b.stop()
+        stop()
+        GPIO.cleanup()
