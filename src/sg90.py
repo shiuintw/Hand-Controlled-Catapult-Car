@@ -22,12 +22,8 @@ try:
         set_angle(0)
         time.sleep(1)
 
-        print("90 degrees")
-        set_angle(90)
-        time.sleep(1)
-
-        print("180 degrees")
-        set_angle(180)
+        print("170 degrees")
+        set_angle(170)
         time.sleep(1)
 
 except KeyboardInterrupt:
