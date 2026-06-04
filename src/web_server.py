@@ -5,6 +5,11 @@ from flask import Flask, render_template, request, jsonify
 from hand_ctrl import *
 
 app = Flask(__name__)
+latest_result = {'hands_detected': False, 'hands': []}
+
+# util
+def get_latest():
+    return latest_result
 
 # ======================================================================================
 # Routes
@@ -15,6 +20,7 @@ def index():
 
 @app.route('/process', methods=['POST'])
 def process_frame():
+    global latest_result
     data = request.json
     if not data or 'frame' not in data:
         return jsonify({'error': 'No frame data'}), 400
@@ -23,7 +29,8 @@ def process_frame():
     if frame is None:
         return jsonify({'error': 'Failed to decode frame'}), 400
 
-    return jsonify(process_hands(frame, hands))
+    latest_result = process_hands(frame, hands)
+    return jsonify(latest_result)
 
 # ======================================================================================
 # Run

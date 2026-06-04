@@ -19,6 +19,10 @@ def set_angle(angle):
     time.sleep(0.5)
     pwm.ChangeDutyCycle(0)  # stop jitter
 
+def clean_up():
+    pwm.stop()
+    GPIO.cleanup()
+
 # ======================================================================================
 # Test
 # ======================================================================================
@@ -36,5 +40,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     finally:
-        pwm.stop()
-        GPIO.cleanup()
+        clean_up()
