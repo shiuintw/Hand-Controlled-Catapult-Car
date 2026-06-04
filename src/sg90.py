@@ -4,10 +4,8 @@ import time
 # ======================================================================================
 # Pin Config (BCM)
 # ======================================================================================
+SERVO_PIN = 18 # GPIO 18
 GPIO.setmode(GPIO.BCM)
-SERVO_PIN = 18  # BCM 18 = BOARD pin 12
-
-GPIO.setmode(GPIO.BOARD)
 GPIO.setup(SERVO_PIN, GPIO.OUT)
 
 pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz
