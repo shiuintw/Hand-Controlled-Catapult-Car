@@ -20,7 +20,7 @@ def set_angle(angle):
 
 def clean_up():
     pwm.stop()
-    GPIO.cleanup()
+    # GPIO.cleanup()
 
 # ======================================================================================
 # Test

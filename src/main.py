@@ -18,18 +18,39 @@ if __name__ == '__main__':
 
     try:
         while True:
-            r = web_server.get_latest()
-            if r['hands_detected']:
-                g = r['hands'][0]['gesture']
-                if g == 'open':
-                    wheels.forward()
-                elif g == 'fist':
+            steering = web_server.get_gripping()
+            lever = web_server.get_lever()
+
+            if steering or lever:
+                # Driving mode
+                angle = web_server.get_steer() if steering else 0
+                speed = web_server.get_speed() if lever else 0
+
+                if abs(speed) < 10:
                     wheels.stop()
-                elif g == 'point':
-                    pass
-                    # sg90.fire()
+                elif speed > 0:
+                    wheels.steer(angle, base_speed=speed)
+                else:
+                    # Backward with steering
+                    wheels.steer(angle, base_speed=speed)
+
             else:
-                wheels.stop()
+                # No wheel or lever → gesture mode
+                r = web_server.get_latest()
+                if r['hands_detected']:
+                    g = r['hands'][0]['gesture']
+                    if g == 'open':
+                        wheels.forward()
+                    elif g == 'fist':
+                        wheels.stop()
+                    elif g == 'point':
+                        pass
+                        # sg90.fire()
+                    else:
+                        wheels.stop()
+                else:
+                    wheels.stop()
+
             time.sleep(0.05)
     except KeyboardInterrupt:
         pass

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hand Gesture Controller</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -30,17 +31,22 @@
             border: 2px solid #e94560;
             border-radius: 12px;
             overflow: hidden;
+            width: 640px;
+            height: 480px;
+            transform: scaleX(-1);
         }
-        video, canvas {
+        video {
             display: block;
             width: 640px;
             height: 480px;
             border-radius: 10px;
         }
-        #overlay {
+        .video-box canvas {
             position: absolute;
             top: 0;
             left: 0;
+            width: 640px;
+            height: 480px;
             pointer-events: none;
         }
 
@@ -75,65 +81,120 @@
             color: #e94560;
         }
 
+        .steer-display {
+            text-align: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #0f3460;
+            border-radius: 8px;
+        }
+        .steer-angle {
+            font-size: 28px;
+            font-weight: bold;
+            font-family: 'Consolas', monospace;
+        }
+        .steer-status {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #999;
+        }
+        .steer-bar-track {
+            width: 100%;
+            height: 8px;
+            background: #0a1a3a;
+            border-radius: 4px;
+            margin-top: 8px;
+            position: relative;
+        }
+        .steer-bar-center {
+            position: absolute;
+            left: 50%;
+            top: -2px;
+            width: 2px;
+            height: 12px;
+            background: #666;
+        }
+        .steer-bar-fill {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: #e94560;
+            border-radius: 4px;
+            transition: left 0.1s, width 0.1s;
+        }
+
+        .speed-display {
+            text-align: center;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #0f3460;
+            border-radius: 8px;
+        }
+        .speed-value {
+            font-size: 28px;
+            font-weight: bold;
+            font-family: 'Consolas', monospace;
+        }
+        .speed-label {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #999;
+        }
+        .speed-bar-track {
+            width: 100%;
+            height: 8px;
+            background: #0a1a3a;
+            border-radius: 4px;
+            margin-top: 8px;
+            position: relative;
+        }
+        .speed-bar-center {
+            position: absolute;
+            left: 50%;
+            top: -2px;
+            width: 2px;
+            height: 12px;
+            background: #666;
+        }
+        .speed-bar-fill {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 4px;
+            transition: left 0.1s, width 0.1s;
+        }
+
         .finger-bar {
             display: flex;
             align-items: center;
             margin-bottom: 6px;
             gap: 8px;
         }
-        .finger-bar .name {
-            width: 55px;
-            font-size: 12px;
-        }
+        .finger-bar .name { width: 55px; font-size: 12px; }
         .finger-bar .bar {
-            flex: 1;
-            height: 14px;
-            background: #0f3460;
-            border-radius: 7px;
-            overflow: hidden;
+            flex: 1; height: 14px; background: #0f3460;
+            border-radius: 7px; overflow: hidden;
         }
         .finger-bar .bar-fill {
-            height: 100%;
-            border-radius: 7px;
-            transition: width 0.1s;
+            height: 100%; border-radius: 7px; transition: width 0.1s;
         }
         .finger-bar .angle {
-            width: 40px;
-            text-align: right;
-            font-size: 11px;
-            color: #999;
+            width: 40px; text-align: right; font-size: 11px; color: #999;
         }
 
-        .divider {
-            border: none;
-            border-top: 1px solid #0f3460;
-            margin: 12px 0;
-        }
+        .divider { border: none; border-top: 1px solid #0f3460; margin: 12px 0; }
 
         .status {
-            margin-top: 12px;
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 13px;
+            margin-top: 12px; padding: 8px; border-radius: 8px;
+            text-align: center; font-size: 13px;
         }
         .status.connected { background: #1b4332; color: #95d5b2; }
         .status.disconnected { background: #4a1a1a; color: #f5a5a5; }
 
-        .controls {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-        }
+        .controls { margin-top: 10px; display: flex; gap: 10px; }
         .controls button {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            background: #e94560;
-            color: white;
+            flex: 1; padding: 8px; border: none; border-radius: 6px;
+            cursor: pointer; font-size: 13px; background: #e94560; color: white;
         }
         .controls button:hover { background: #c23152; }
         .controls button.active { background: #2ecc71; }
@@ -146,238 +207,553 @@
 <h1>Hand Gesture Controller</h1>
 
 <div class="container">
-    <!-- Video -->
     <div class="video-box">
         <video id="webcam" autoplay playsinline></video>
         <canvas id="overlay"></canvas>
+        <canvas id="wheelCanvas"></canvas>
     </div>
 
-    <!-- Info Panel -->
     <div class="info-panel">
         <h2>Gesture</h2>
         <div class="gesture-display" id="gestureEmoji">🖐️</div>
         <div class="gesture-label" id="gestureLabel">Waiting...</div>
 
+        <h2>Steering</h2>
+        <div class="steer-display">
+            <div class="steer-angle" id="steerAngle">0°</div>
+            <div class="steer-status" id="steerStatus">Hands off wheel</div>
+            <div class="steer-bar-track">
+                <div class="steer-bar-center"></div>
+                <div class="steer-bar-fill" id="steerBar"></div>
+            </div>
+        </div>
+
+        <h2>Speed</h2>
+        <div class="speed-display">
+            <div class="speed-value" id="speedValue">0%</div>
+            <div class="speed-label" id="speedLabel">Lever idle</div>
+            <div class="speed-bar-track">
+                <div class="speed-bar-center"></div>
+                <div class="speed-bar-fill" id="speedBar"></div>
+            </div>
+        </div>
+
         <h2>Hand 1</h2>
-        <div class="finger-bar">
-            <span class="name">Thumb</span>
-            <div class="bar"><div class="bar-fill" id="bar-thumb-L" style="width:0%;background:#e74c3c"></div></div>
-            <span class="angle" id="angle-thumb-L">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Index</span>
-            <div class="bar"><div class="bar-fill" id="bar-index-L" style="width:0%;background:#e67e22"></div></div>
-            <span class="angle" id="angle-index-L">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Middle</span>
-            <div class="bar"><div class="bar-fill" id="bar-middle-L" style="width:0%;background:#f1c40f"></div></div>
-            <span class="angle" id="angle-middle-L">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Ring</span>
-            <div class="bar"><div class="bar-fill" id="bar-ring-L" style="width:0%;background:#2ecc71"></div></div>
-            <span class="angle" id="angle-ring-L">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Pinky</span>
-            <div class="bar"><div class="bar-fill" id="bar-pinky-L" style="width:0%;background:#3498db"></div></div>
-            <span class="angle" id="angle-pinky-L">-</span>
-        </div>
+        <div class="finger-bar"><span class="name">Thumb</span><div class="bar"><div class="bar-fill" id="bar-thumb-L" style="width:0%;background:#e74c3c"></div></div><span class="angle" id="angle-thumb-L">-</span></div>
+        <div class="finger-bar"><span class="name">Index</span><div class="bar"><div class="bar-fill" id="bar-index-L" style="width:0%;background:#e67e22"></div></div><span class="angle" id="angle-index-L">-</span></div>
+        <div class="finger-bar"><span class="name">Middle</span><div class="bar"><div class="bar-fill" id="bar-middle-L" style="width:0%;background:#f1c40f"></div></div><span class="angle" id="angle-middle-L">-</span></div>
+        <div class="finger-bar"><span class="name">Ring</span><div class="bar"><div class="bar-fill" id="bar-ring-L" style="width:0%;background:#2ecc71"></div></div><span class="angle" id="angle-ring-L">-</span></div>
+        <div class="finger-bar"><span class="name">Pinky</span><div class="bar"><div class="bar-fill" id="bar-pinky-L" style="width:0%;background:#3498db"></div></div><span class="angle" id="angle-pinky-L">-</span></div>
 
         <hr class="divider">
 
         <h2>Hand 2</h2>
-        <div class="finger-bar">
-            <span class="name">Thumb</span>
-            <div class="bar"><div class="bar-fill" id="bar-thumb-R" style="width:0%;background:#e74c3c"></div></div>
-            <span class="angle" id="angle-thumb-R">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Index</span>
-            <div class="bar"><div class="bar-fill" id="bar-index-R" style="width:0%;background:#e67e22"></div></div>
-            <span class="angle" id="angle-index-R">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Middle</span>
-            <div class="bar"><div class="bar-fill" id="bar-middle-R" style="width:0%;background:#f1c40f"></div></div>
-            <span class="angle" id="angle-middle-R">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Ring</span>
-            <div class="bar"><div class="bar-fill" id="bar-ring-R" style="width:0%;background:#2ecc71"></div></div>
-            <span class="angle" id="angle-ring-R">-</span>
-        </div>
-        <div class="finger-bar">
-            <span class="name">Pinky</span>
-            <div class="bar"><div class="bar-fill" id="bar-pinky-R" style="width:0%;background:#3498db"></div></div>
-            <span class="angle" id="angle-pinky-R">-</span>
-        </div>
+        <div class="finger-bar"><span class="name">Thumb</span><div class="bar"><div class="bar-fill" id="bar-thumb-R" style="width:0%;background:#e74c3c"></div></div><span class="angle" id="angle-thumb-R">-</span></div>
+        <div class="finger-bar"><span class="name">Index</span><div class="bar"><div class="bar-fill" id="bar-index-R" style="width:0%;background:#e67e22"></div></div><span class="angle" id="angle-index-R">-</span></div>
+        <div class="finger-bar"><span class="name">Middle</span><div class="bar"><div class="bar-fill" id="bar-middle-R" style="width:0%;background:#f1c40f"></div></div><span class="angle" id="angle-middle-R">-</span></div>
+        <div class="finger-bar"><span class="name">Ring</span><div class="bar"><div class="bar-fill" id="bar-ring-R" style="width:0%;background:#2ecc71"></div></div><span class="angle" id="angle-ring-R">-</span></div>
+        <div class="finger-bar"><span class="name">Pinky</span><div class="bar"><div class="bar-fill" id="bar-pinky-R" style="width:0%;background:#3498db"></div></div><span class="angle" id="angle-pinky-R">-</span></div>
 
         <div class="status connected" id="status">Connecting...</div>
-
         <div class="controls">
             <button id="btnToggle" onclick="toggleCapture()">Stop</button>
         </div>
-
         <div class="fps" id="fpsDisplay">FPS: -</div>
     </div>
 </div>
 
 <script>
-    const video = document.getElementById('webcam');
-    const overlay = document.getElementById('overlay');
-    const ctx = overlay.getContext('2d');
+// ==========================================================================
+// Video & overlay setup
+// ==========================================================================
+const video = document.getElementById('webcam');
+const overlay = document.getElementById('overlay');
+const octx = overlay.getContext('2d');
+let capturing = true, lastTime = performance.now(), frameCount = 0;
 
-    let capturing = true;
-    let lastTime = performance.now();
-    let frameCount = 0;
+// ==========================================================================
+// Three.js steering wheel (shifted left)
+// ==========================================================================
+const wheelCanvas = document.getElementById('wheelCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas: wheelCanvas, alpha: true, antialias: true });
+renderer.setSize(640, 480);
+renderer.setClearColor(0x000000, 0);
 
-    const gestureMap = {
-        'open':      { emoji: '🖐️', label: 'Open' },
-        'fist':      { emoji: '✊',  label: 'Fist' },
-        'point':     { emoji: '👆', label: 'Point' },
-        'thumbs_up': { emoji: '👍', label: 'Thumbs Up' },
-        'unknown':   { emoji: '❓', label: 'Unknown' },
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 640 / 480, 0.1, 100);
+camera.position.set(0, -0.5, 4.5);
+camera.lookAt(0, -0.3, 0);
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(2, 3, 5);
+scene.add(dirLight);
+const rimLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+rimLight.position.set(-3, -1, 2);
+scene.add(rimLight);
+
+// --- Build steering wheel ---
+const wheelGroup = new THREE.Group();
+
+const rimGeo = new THREE.TorusGeometry(1.3, 0.08, 16, 64);
+const rimMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.7 });
+const rim = new THREE.Mesh(rimGeo, rimMat);
+wheelGroup.add(rim);
+
+const gripMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9, metalness: 0.1 });
+const gripGeo = new THREE.TorusGeometry(1.3, 0.1, 12, 64);
+const grip = new THREE.Mesh(gripGeo, gripMat);
+wheelGroup.add(grip);
+
+const hubGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.12, 32);
+const hubMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2, metalness: 0.8 });
+const hub = new THREE.Mesh(hubGeo, hubMat);
+hub.rotation.x = Math.PI / 2;
+wheelGroup.add(hub);
+
+const capGeo = new THREE.CircleGeometry(0.26, 32);
+const capMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.3, metalness: 0.6 });
+const cap = new THREE.Mesh(capGeo, capMat);
+cap.position.z = 0.061;
+wheelGroup.add(cap);
+
+const spokeMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.3, metalness: 0.6 });
+for (let i = 0; i < 3; i++) {
+    const angle = (i * Math.PI * 2) / 3;
+    const spokeGeo = new THREE.BoxGeometry(1.0, 0.1, 0.05);
+    const spoke = new THREE.Mesh(spokeGeo, spokeMat);
+    spoke.position.x = Math.cos(angle) * 0.65;
+    spoke.position.y = Math.sin(angle) * 0.65;
+    spoke.rotation.z = angle;
+    wheelGroup.add(spoke);
+}
+
+wheelGroup.position.set(0.7, -0.7, 0);
+wheelGroup.rotation.x = 0.35;
+scene.add(wheelGroup);
+
+// ==========================================================================
+// Hitbox config
+// ==========================================================================
+// Steering wheel hitbox (left side)
+let wheelRotation = 0;
+let gripping = false;
+const WHEEL_HITBOX_RADIUS = 0.3;
+const WHEEL_HITBOX_CENTER = { x: 0.67, y: 0.58 };
+
+// Speed lever hitbox (right side, vertical rectangle)
+let leverSpeed = 0;
+let leverGripping = false;
+const LEVER = {
+    x: 0.13,
+    yTop: 0.40,
+    yBot: 0.95,
+    halfW: 0.08
+};
+
+// ==========================================================================
+// Gesture map
+// ==========================================================================
+const gestureMap = {
+    'open':      { emoji: '🖐️', label: 'Open' },
+    'fist':      { emoji: '✊',  label: 'Fist' },
+    'point':     { emoji: '👆', label: 'Point' },
+    'thumbs_up': { emoji: '👍', label: 'Thumbs Up' },
+    'unknown':   { emoji: '❓', label: 'Unknown' },
+};
+
+// ==========================================================================
+// Camera
+// ==========================================================================
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480 }
+        });
+        video.srcObject = stream;
+        video.addEventListener('loadeddata', () => {
+            overlay.width = video.videoWidth;
+            overlay.height = video.videoHeight;
+            processLoop();
+        });
+    } catch (err) {
+        document.getElementById('status').className = 'status disconnected';
+        document.getElementById('status').textContent = 'Cannot access camera: ' + err.message;
+    }
+}
+
+// ==========================================================================
+// Main loop
+// ==========================================================================
+async function processLoop() {
+    if (!capturing) { requestAnimationFrame(processLoop); return; }
+
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = video.videoWidth;
+    tmpCanvas.height = video.videoHeight;
+    tmpCanvas.getContext('2d').drawImage(video, 0, 0);
+    const dataURL = tmpCanvas.toDataURL('image/jpeg', 0.7);
+
+    try {
+        const resp = await fetch('/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ frame: dataURL })
+        });
+        const result = await resp.json();
+        updateUI(result);
+    } catch (err) {
+        document.getElementById('status').className = 'status disconnected';
+        document.getElementById('status').textContent = 'Connection failed';
+    }
+
+    frameCount++;
+    const now = performance.now();
+    if (now - lastTime >= 1000) {
+        document.getElementById('fpsDisplay').textContent = `FPS: ${frameCount}`;
+        frameCount = 0;
+        lastTime = now;
+    }
+
+    requestAnimationFrame(processLoop);
+}
+
+// ==========================================================================
+// Hitbox helpers
+// ==========================================================================
+function palmCenter(landmarks) {
+    return {
+        x: (landmarks[0].x + landmarks[9].x) / 2,
+        y: (landmarks[0].y + landmarks[9].y) / 2
     };
+}
 
-    async function startCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 640, height: 480 }
-            });
-            video.srcObject = stream;
-            video.addEventListener('loadeddata', () => {
-                overlay.width = video.videoWidth;
-                overlay.height = video.videoHeight;
-                processLoop();
-            });
-        } catch (err) {
-            document.getElementById('status').className = 'status disconnected';
-            document.getElementById('status').textContent = 'Cannot access camera: ' + err.message;
+function isInWheelHitbox(point) {
+    const dx = point.x - WHEEL_HITBOX_CENTER.x;
+    const dy = point.y - WHEEL_HITBOX_CENTER.y;
+    return Math.sqrt(dx * dx + dy * dy) < WHEEL_HITBOX_RADIUS;
+}
+
+function isInLeverHitbox(point) {
+    return point.x > LEVER.x - LEVER.halfW &&
+           point.x < LEVER.x + LEVER.halfW &&
+           point.y > LEVER.yTop &&
+           point.y < LEVER.yBot;
+}
+
+function computeSteerAngle(handsInWheel) {
+    const angles = handsInWheel.map(h => {
+        const dx = h.x - WHEEL_HITBOX_CENTER.x;
+        const dy = h.y - WHEEL_HITBOX_CENTER.y;
+        return Math.atan2(dx, -dy) * (180 / Math.PI);
+    });
+
+    if (angles.length === 2) {
+        let avg = (angles[0] + angles[1]) / 2;
+        if (Math.abs(angles[0] - angles[1]) > 180) {
+            avg += 180;
+            if (avg > 180) avg -= 360;
+        }
+        return avg;
+    } else if (angles.length === 1) {
+        return angles[0];
+    }
+    return 0;
+}
+
+function computeLeverSpeed(point) {
+    // Map y position: yTop = +100 (full forward), yBot = -100 (full backward)
+    // center = 0
+    const yCenter = (LEVER.yTop + LEVER.yBot) / 2;
+    const yRange = (LEVER.yBot - LEVER.yTop) / 2;
+    const normalized = -(point.y - yCenter) / yRange; // -1 to +1
+    return Math.round(Math.max(-100, Math.min(100, normalized * 100)));
+}
+
+// ==========================================================================
+// Draw lever visual on overlay
+// ==========================================================================
+function drawLever(w, h) {
+    const lx = LEVER.x * w;
+    const ly1 = LEVER.yTop * h;
+    const ly2 = LEVER.yBot * h;
+    const lw = LEVER.halfW * w;
+    const yCenter = ((LEVER.yTop + LEVER.yBot) / 2) * h;
+
+    // Track background
+    octx.fillStyle = leverGripping ? 'rgba(46, 204, 113, 0.15)' : 'rgba(255, 255, 255, 0.08)';
+    octx.fillRect(lx - lw, ly1, lw * 2, ly2 - ly1);
+
+    // Track border
+    octx.strokeStyle = leverGripping ? 'rgba(46, 204, 113, 0.5)' : 'rgba(255, 255, 255, 0.2)';
+    octx.lineWidth = 2;
+    octx.setLineDash([6, 6]);
+    octx.strokeRect(lx - lw, ly1, lw * 2, ly2 - ly1);
+    octx.setLineDash([]);
+
+    // Center line (zero speed)
+    octx.beginPath();
+    octx.moveTo(lx - lw + 4, yCenter);
+    octx.lineTo(lx + lw - 4, yCenter);
+    octx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    octx.lineWidth = 1;
+    octx.stroke();
+
+    // Labels
+    octx.save();
+    octx.scale(-1, 1); // undo scaleX(-1) for text
+    octx.fillStyle = 'rgba(255,255,255,0.4)';
+    octx.font = '11px Segoe UI';
+    octx.textAlign = 'center';
+    octx.fillText('FWD', -(lx), ly1 + 14);
+    octx.fillText('BWD', -(lx), ly2 - 6);
+    octx.restore();
+
+    // Speed indicator bar (filled from center)
+    if (Math.abs(leverSpeed) > 5) {
+        const barHeight = (Math.abs(leverSpeed) / 100) * (yCenter - ly1);
+        if (leverSpeed > 0) {
+            // Forward: fill upward from center (green)
+            octx.fillStyle = 'rgba(46, 204, 113, 0.5)';
+            octx.fillRect(lx - lw + 4, yCenter - barHeight, (lw - 4) * 2, barHeight);
+        } else {
+            // Backward: fill downward from center (red)
+            octx.fillStyle = 'rgba(231, 76, 60, 0.5)';
+            octx.fillRect(lx - lw + 4, yCenter, (lw - 4) * 2, barHeight);
         }
     }
+}
 
-    async function processLoop() {
-        if (!capturing) {
-            requestAnimationFrame(processLoop);
-            return;
-        }
+// ==========================================================================
+// UI update
+// ==========================================================================
+function updateUI(result) {
+    octx.clearRect(0, 0, overlay.width, overlay.height);
+    const w = overlay.width, h = overlay.height;
 
-        const tmpCanvas = document.createElement('canvas');
-        tmpCanvas.width = video.videoWidth;
-        tmpCanvas.height = video.videoHeight;
-        tmpCanvas.getContext('2d').drawImage(video, 0, 0);
-        const dataURL = tmpCanvas.toDataURL('image/jpeg', 0.7);
+    // Draw wheel hitbox circle
+    octx.beginPath();
+    octx.arc(
+        WHEEL_HITBOX_CENTER.x * w,
+        WHEEL_HITBOX_CENTER.y * h,
+        WHEEL_HITBOX_RADIUS * w,
+        0, Math.PI * 2
+    );
+    octx.strokeStyle = gripping ? 'rgba(46, 204, 113, 0.4)' : 'rgba(255, 255, 255, 0.15)';
+    octx.lineWidth = 2;
+    octx.setLineDash([8, 8]);
+    octx.stroke();
+    octx.setLineDash([]);
 
-        try {
-            const resp = await fetch('/process', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ frame: dataURL })
-            });
-            const result = await resp.json();
-            updateUI(result);
-        } catch (err) {
-            document.getElementById('status').className = 'status disconnected';
-            document.getElementById('status').textContent = 'Connection failed';
-        }
+    // Draw lever
+    drawLever(w, h);
 
-        frameCount++;
-        const now = performance.now();
-        if (now - lastTime >= 1000) {
-            document.getElementById('fpsDisplay').textContent = `FPS: ${frameCount}`;
-            frameCount = 0;
-            lastTime = now;
-        }
-
-        requestAnimationFrame(processLoop);
+    if (!result.hands_detected) {
+        document.getElementById('gestureEmoji').textContent = '🔍';
+        document.getElementById('gestureLabel').textContent = 'No hand detected';
+        gripping = false;
+        leverGripping = false;
+        updateSteerUI(0, false);
+        updateSpeedUI(0, false);
+        clearAngleBars();
+        renderWheel();
+        return;
     }
 
-    function updateUI(result) {
-        ctx.clearRect(0, 0, overlay.width, overlay.height);
+    // Draw skeletons
+    const colors = ['#00ff88', '#ff8800'];
+    result.hands.forEach((hand, i) => {
+        if (hand.landmarks) drawLandmarks(hand.landmarks, colors[i] || colors[0]);
+    });
 
-        if (!result.hands_detected) {
-            document.getElementById('gestureEmoji').textContent = '🔍';
-            document.getElementById('gestureLabel').textContent = 'No hand detected';
-            for (const side of ['L', 'R']) {
-                for (const f of ['thumb','index','middle','ring','pinky']) {
-                    const bar = document.getElementById(`bar-${f}-${side}`);
-                    const label = document.getElementById(`angle-${f}-${side}`);
-                    if (bar) bar.style.width = '0%';
-                    if (label) label.textContent = '-';
-                }
+    // Gesture display
+    const emojis = result.hands.map(h => (gestureMap[h.gesture] || gestureMap['unknown']).emoji);
+    document.getElementById('gestureEmoji').textContent = emojis.join('  ');
+    const labels = result.hands.map(h => (gestureMap[h.gesture] || gestureMap['unknown']).label);
+    document.getElementById('gestureLabel').textContent = labels.join(' | ');
+
+    // Angle bars
+    result.hands.forEach((hand, i) => {
+        const side = i === 0 ? 'L' : 'R';
+        for (const [finger, angle] of Object.entries(hand.angles)) {
+            const pct = (angle / 180) * 100;
+            const bar = document.getElementById(`bar-${finger}-${side}`);
+            const label = document.getElementById(`angle-${finger}-${side}`);
+            if (bar) bar.style.width = pct + '%';
+            if (label) label.textContent = Math.round(angle) + '°';
+        }
+    });
+
+    // --- Check each hand for wheel or lever ---
+    const handsInWheel = [];
+    let leverHand = null;
+
+    result.hands.forEach(hand => {
+        if (hand.landmarks) {
+            const palm = palmCenter(hand.landmarks);
+
+            if (isInWheelHitbox(palm)) {
+                handsInWheel.push(palm);
+                octx.beginPath();
+                octx.arc(palm.x * w, palm.y * h, 8, 0, Math.PI * 2);
+                octx.fillStyle = 'rgba(46, 204, 113, 0.7)';
+                octx.fill();
+            } else if (isInLeverHitbox(palm)) {
+                leverHand = palm;
+                octx.beginPath();
+                octx.arc(palm.x * w, palm.y * h, 8, 0, Math.PI * 2);
+                octx.fillStyle = 'rgba(52, 152, 219, 0.7)';
+                octx.fill();
             }
-            return;
         }
+    });
 
-        // Draw skeletons
-        const colors = ['#00ff88', '#ff8800'];
-        result.hands.forEach((hand, i) => {
-            if (hand.landmarks) drawLandmarks(hand.landmarks, colors[i] || colors[0]);
-        });
+    // --- Steering ---
+    gripping = handsInWheel.length > 0;
 
-        // Gesture display
-        const emojis = result.hands.map(h => (gestureMap[h.gesture] || gestureMap['unknown']).emoji);
-        document.getElementById('gestureEmoji').textContent = emojis.join('  ');
-
-        const labels = result.hands.map(h => (gestureMap[h.gesture] || gestureMap['unknown']).label);
-        document.getElementById('gestureLabel').textContent = labels.join(' | ');
-
-        // Angle bars
-        result.hands.forEach((hand, i) => {
-            const side = i === 0 ? 'L' : 'R';
-            for (const [finger, angle] of Object.entries(hand.angles)) {
-                const pct = (angle / 180) * 100;
-                const bar = document.getElementById(`bar-${finger}-${side}`);
-                const label = document.getElementById(`angle-${finger}-${side}`);
-                if (bar) bar.style.width = pct + '%';
-                if (label) label.textContent = Math.round(angle) + '°';
-            }
-        });
-
-        document.getElementById('status').className = 'status connected';
-        document.getElementById('status').textContent = 'Detecting';
+    if (gripping) {
+        const steerDeg = computeSteerAngle(handsInWheel);
+        const clamped = Math.max(-90, Math.min(90, steerDeg));
+        wheelRotation = clamped;
+        updateSteerUI(-clamped, true);
+    } else {
+        wheelRotation *= 0.85;
+        if (Math.abs(wheelRotation) < 1) wheelRotation = 0;
+        updateSteerUI(-wheelRotation, false);
     }
 
-    function drawLandmarks(landmarks, color) {
-        const w = overlay.width;
-        const h = overlay.height;
+    // --- Lever ---
+    leverGripping = leverHand !== null;
 
-        const connections = [
-            [0,1],[1,2],[2,3],[3,4],
-            [0,5],[5,6],[6,7],[7,8],
-            [5,9],[9,10],[10,11],[11,12],
-            [9,13],[13,14],[14,15],[15,16],
-            [13,17],[17,18],[18,19],[19,20],[0,17]
-        ];
-
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        for (const [i, j] of connections) {
-            ctx.beginPath();
-            ctx.moveTo(landmarks[i].x * w, landmarks[i].y * h);
-            ctx.lineTo(landmarks[j].x * w, landmarks[j].y * h);
-            ctx.stroke();
-        }
-
-        for (const lm of landmarks) {
-            ctx.beginPath();
-            ctx.arc(lm.x * w, lm.y * h, 4, 0, Math.PI * 2);
-            ctx.fillStyle = '#e94560';
-            ctx.fill();
-        }
+    if (leverGripping) {
+        leverSpeed = computeLeverSpeed(leverHand);
+        updateSpeedUI(leverSpeed, true);
+    } else {
+        leverSpeed = Math.round(leverSpeed * 0.8);
+        if (Math.abs(leverSpeed) < 3) leverSpeed = 0;
+        updateSpeedUI(leverSpeed, false);
     }
 
-    function toggleCapture() {
-        capturing = !capturing;
-        const btn = document.getElementById('btnToggle');
-        btn.textContent = capturing ? 'Stop' : 'Continue';
-        btn.className = capturing ? '' : 'active';
-    }
+    // --- Send combined control ---
+    sendControl(-wheelRotation, leverSpeed);
 
-    startCamera();
+    renderWheel();
+
+    document.getElementById('status').className = 'status connected';
+    document.getElementById('status').textContent = 'Detecting';
+}
+
+function clearAngleBars() {
+    for (const side of ['L', 'R']) {
+        for (const f of ['thumb','index','middle','ring','pinky']) {
+            const bar = document.getElementById(`bar-${f}-${side}`);
+            const label = document.getElementById(`angle-${f}-${side}`);
+            if (bar) bar.style.width = '0%';
+            if (label) label.textContent = '-';
+        }
+    }
+}
+
+function updateSteerUI(angle, isGripping) {
+    document.getElementById('steerAngle').textContent = Math.round(angle) + '°';
+    document.getElementById('steerStatus').textContent = isGripping ? 'Steering' : 'Hands off wheel';
+
+    const pct = ((angle + 90) / 180) * 100;
+    const bar = document.getElementById('steerBar');
+    if (angle >= 0) {
+        bar.style.left = '50%';
+        bar.style.width = (pct - 50) + '%';
+    } else {
+        bar.style.left = pct + '%';
+        bar.style.width = (50 - pct) + '%';
+    }
+    bar.style.background = isGripping ? '#e94560' : '#555';
+}
+
+function updateSpeedUI(speed, isGripping) {
+    const dir = speed > 5 ? 'FWD' : speed < -5 ? 'BWD' : '';
+    document.getElementById('speedValue').textContent = (speed > 0 ? '+' : '') + speed + '%';
+    document.getElementById('speedLabel').textContent = isGripping ? ('Lever: ' + dir) : 'Lever idle';
+
+    const pct = ((speed + 100) / 200) * 100;
+    const bar = document.getElementById('speedBar');
+    if (speed >= 0) {
+        bar.style.left = '50%';
+        bar.style.width = (pct - 50) + '%';
+        bar.style.background = isGripping ? '#2ecc71' : '#555';
+    } else {
+        bar.style.left = pct + '%';
+        bar.style.width = (50 - pct) + '%';
+        bar.style.background = isGripping ? '#e74c3c' : '#555';
+    }
+}
+
+// ==========================================================================
+// Send combined control to backend
+// ==========================================================================
+function sendControl(angle, speed) {
+    fetch('/steer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            angle: Math.round(angle),
+            speed: speed,
+            gripping: gripping,
+            lever_gripping: leverGripping
+        })
+    }).catch(() => {});
+}
+
+// ==========================================================================
+// Render 3D wheel
+// ==========================================================================
+function renderWheel() {
+    wheelGroup.rotation.z = -(wheelRotation * Math.PI / 180);
+
+    const gripColor = gripping ? 0x3a3a3a : 0x222222;
+    rimMat.color.setHex(gripColor);
+    grip.material.emissive.setHex(gripping ? 0x112211 : 0x000000);
+
+    renderer.render(scene, camera);
+}
+
+renderWheel();
+
+// ==========================================================================
+// Draw landmarks
+// ==========================================================================
+function drawLandmarks(landmarks, color) {
+    const w = overlay.width, h = overlay.height;
+    const connections = [
+        [0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
+        [5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],
+        [13,17],[17,18],[18,19],[19,20],[0,17]
+    ];
+    octx.strokeStyle = color;
+    octx.lineWidth = 2;
+    for (const [i, j] of connections) {
+        octx.beginPath();
+        octx.moveTo(landmarks[i].x * w, landmarks[i].y * h);
+        octx.lineTo(landmarks[j].x * w, landmarks[j].y * h);
+        octx.stroke();
+    }
+    for (const lm of landmarks) {
+        octx.beginPath();
+        octx.arc(lm.x * w, lm.y * h, 4, 0, Math.PI * 2);
+        octx.fillStyle = '#e94560';
+        octx.fill();
+    }
+}
+
+function toggleCapture() {
+    capturing = !capturing;
+    const btn = document.getElementById('btnToggle');
+    btn.textContent = capturing ? 'Stop' : 'Continue';
+    btn.className = capturing ? '' : 'active';
+}
+
+startCamera();
 </script>
-
 </body>
 </html>

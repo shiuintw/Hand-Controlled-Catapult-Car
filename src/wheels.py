@@ -68,6 +68,37 @@ def clean_up():
     GPIO.cleanup()
 
 # ======================================================================================
+# Steering function (angle-based control)
+# ======================================================================================
+DEAD_ZONE = 15  # degrees, within this range = go straight
+
+def steer(angle, base_speed=80):
+    if abs(base_speed) < 10:
+        stop()
+        return
+
+    backward = base_speed < 0
+    spd = abs(base_speed)
+    ratio = abs(angle) / 90.0 if abs(angle) > DEAD_ZONE else 0
+
+    speed_l = max(0, min(100, spd * (1 - ratio) - 5)) if angle < -DEAD_ZONE else max(0, min(100, spd - 5))
+    speed_r = max(0, min(100, spd * (1 - ratio))) if angle > DEAD_ZONE else max(0, min(100, spd))
+
+    pwm_a.ChangeDutyCycle(speed_l)
+    pwm_b.ChangeDutyCycle(speed_r)
+
+    if backward:
+        GPIO.output(IN1, GPIO.LOW)
+        GPIO.output(IN2, GPIO.HIGH)
+        GPIO.output(IN3, GPIO.LOW)
+        GPIO.output(IN4, GPIO.HIGH)
+    else:
+        GPIO.output(IN1, GPIO.HIGH)
+        GPIO.output(IN2, GPIO.LOW)
+        GPIO.output(IN3, GPIO.HIGH)
+        GPIO.output(IN4, GPIO.LOW)
+
+# ======================================================================================
 # Test
 # ======================================================================================
 if __name__ == '__main__':

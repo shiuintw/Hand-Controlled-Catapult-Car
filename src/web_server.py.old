@@ -6,26 +6,10 @@ from hand_ctrl import *
 
 app = Flask(__name__)
 latest_result = {'hands_detected': False, 'hands': []}
-latest_steer = 0
-latest_speed = 0
-latest_gripping = False
-latest_lever = False
 
 # util
 def get_latest():
     return latest_result
-
-def get_steer():
-    return latest_steer
-
-def get_speed():
-    return latest_speed
-
-def get_gripping():
-    return latest_gripping
-
-def get_lever():
-    return latest_lever
 
 # ======================================================================================
 # Routes
@@ -47,17 +31,6 @@ def process_frame():
 
     latest_result = process_hands(frame, hands)
     return jsonify(latest_result)
-
-@app.route('/steer', methods=['POST'])
-def steer():
-    global latest_steer, latest_speed, latest_gripping, latest_lever
-    data = request.json
-    if data:
-        latest_steer = max(-90, min(90, int(data.get('angle', 0))))
-        latest_speed = max(-100, min(100, int(data.get('speed', 0))))
-        latest_gripping = data.get('gripping', False)
-        latest_lever = data.get('lever_gripping', False)
-    return jsonify({'ok': True})
 
 # ======================================================================================
 # Run
