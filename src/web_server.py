@@ -28,6 +28,42 @@ def get_lever():
     return latest_lever
 
 # ======================================================================================
+# Picamera2
+# ======================================================================================
+from flask import Response
+import cv2
+
+# 只在 RPi 上 import
+try:
+    from picamera2 import Picamera2
+    picam = Picamera2()
+    picam.configure(picam.create_preview_configuration(
+        main={"size": (640, 480), "format": "RGB888"}
+    ))
+    picam.start()
+    PICAM_OK = True
+except Exception as e:
+    print("Picamera2 not available:", e)
+    PICAM_OK = False
+
+def gen_frames():
+    while True:
+        frame = picam.capture_array()
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        ret, buffer = cv2.imencode('.jpg', frame)
+        if not ret:
+            continue
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+
+@app.route('/picam')
+def picam_feed():
+    if not PICAM_OK:
+        return "Picamera2 not available", 503
+    return Response(gen_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# ======================================================================================
 # Routes
 # ======================================================================================
 @app.route('/')
