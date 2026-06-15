@@ -83,8 +83,16 @@
             background: #16213e;
             border-radius: 12px;
             padding: 20px;
-            min-width: 260px;
-            max-width: 300px;
+            width: 100%;
+            max-width: 1300px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        .info-col {
+            flex: 1;
+            min-width: 150px;
         }
         .info-panel h2 {
             color: #e94560;
@@ -92,7 +100,7 @@
             margin-top: 15px;
             font-size: 16px;
         }
-        .info-panel h2:first-child { margin-top: 0; }
+        .info-col h2:first-child { margin-top: 0; }
 
         .gesture-display {
             font-size: 48px;
@@ -249,51 +257,62 @@
     </div>
 
     <div class="info-panel">
-        <h2>Gesture</h2>
-        <div class="gesture-display" id="gestureEmoji">🖐️</div>
-        <div class="gesture-label" id="gestureLabel">Waiting...</div>
+        <div class="info-col">
+            <h2>Gesture</h2>
+            <div class="gesture-display" id="gestureEmoji">🖐️</div>
+            <div class="gesture-label" id="gestureLabel">Waiting...</div>
+        </div>
 
-        <h2>Steering</h2>
-        <div class="steer-display">
-            <div class="steer-angle" id="steerAngle">0°</div>
-            <div class="steer-status" id="steerStatus">Hands off wheel</div>
-            <div class="steer-bar-track">
-                <div class="steer-bar-center"></div>
-                <div class="steer-bar-fill" id="steerBar"></div>
+        <div class="info-col">
+            <h2>Steering</h2>
+            <div class="steer-display">
+                <div class="steer-angle" id="steerAngle">0°</div>
+                <div class="steer-status" id="steerStatus">Hands off wheel</div>
+                <div class="steer-bar-track">
+                    <div class="steer-bar-center"></div>
+                    <div class="steer-bar-fill" id="steerBar"></div>
+                </div>
             </div>
         </div>
 
-        <h2>Speed</h2>
-        <div class="speed-display">
-            <div class="speed-value" id="speedValue">0%</div>
-            <div class="speed-label" id="speedLabel">Lever idle</div>
-            <div class="speed-bar-track">
-                <div class="speed-bar-center"></div>
-                <div class="speed-bar-fill" id="speedBar"></div>
+        <div class="info-col">
+            <h2>Speed</h2>
+            <div class="speed-display">
+                <div class="speed-value" id="speedValue">0%</div>
+                <div class="speed-label" id="speedLabel">Lever idle</div>
+                <div class="speed-bar-track">
+                    <div class="speed-bar-center"></div>
+                    <div class="speed-bar-fill" id="speedBar"></div>
+                </div>
             </div>
         </div>
 
-        <h2>Hand 1</h2>
-        <div class="finger-bar"><span class="name">Thumb</span><div class="bar"><div class="bar-fill" id="bar-thumb-L" style="width:0%;background:#e74c3c"></div></div><span class="angle" id="angle-thumb-L">-</span></div>
-        <div class="finger-bar"><span class="name">Index</span><div class="bar"><div class="bar-fill" id="bar-index-L" style="width:0%;background:#e67e22"></div></div><span class="angle" id="angle-index-L">-</span></div>
-        <div class="finger-bar"><span class="name">Middle</span><div class="bar"><div class="bar-fill" id="bar-middle-L" style="width:0%;background:#f1c40f"></div></div><span class="angle" id="angle-middle-L">-</span></div>
-        <div class="finger-bar"><span class="name">Ring</span><div class="bar"><div class="bar-fill" id="bar-ring-L" style="width:0%;background:#2ecc71"></div></div><span class="angle" id="angle-ring-L">-</span></div>
-        <div class="finger-bar"><span class="name">Pinky</span><div class="bar"><div class="bar-fill" id="bar-pinky-L" style="width:0%;background:#3498db"></div></div><span class="angle" id="angle-pinky-L">-</span></div>
-
-        <hr class="divider">
-
-        <h2>Hand 2</h2>
-        <div class="finger-bar"><span class="name">Thumb</span><div class="bar"><div class="bar-fill" id="bar-thumb-R" style="width:0%;background:#e74c3c"></div></div><span class="angle" id="angle-thumb-R">-</span></div>
-        <div class="finger-bar"><span class="name">Index</span><div class="bar"><div class="bar-fill" id="bar-index-R" style="width:0%;background:#e67e22"></div></div><span class="angle" id="angle-index-R">-</span></div>
-        <div class="finger-bar"><span class="name">Middle</span><div class="bar"><div class="bar-fill" id="bar-middle-R" style="width:0%;background:#f1c40f"></div></div><span class="angle" id="angle-middle-R">-</span></div>
-        <div class="finger-bar"><span class="name">Ring</span><div class="bar"><div class="bar-fill" id="bar-ring-R" style="width:0%;background:#2ecc71"></div></div><span class="angle" id="angle-ring-R">-</span></div>
-        <div class="finger-bar"><span class="name">Pinky</span><div class="bar"><div class="bar-fill" id="bar-pinky-R" style="width:0%;background:#3498db"></div></div><span class="angle" id="angle-pinky-R">-</span></div>
-
-        <div class="status connected" id="status">Connecting...</div>
-        <div class="controls">
-            <button id="btnToggle" onclick="toggleCapture()">Stop</button>
+        <div class="info-col">
+            <h2>Hand 1</h2>
+            <div class="finger-bar"><span class="name">Thumb</span><div class="bar"><div class="bar-fill" id="bar-thumb-L" style="width:0%;background:#e74c3c"></div></div><span class="angle" id="angle-thumb-L">-</span></div>
+            <div class="finger-bar"><span class="name">Index</span><div class="bar"><div class="bar-fill" id="bar-index-L" style="width:0%;background:#e67e22"></div></div><span class="angle" id="angle-index-L">-</span></div>
+            <div class="finger-bar"><span class="name">Middle</span><div class="bar"><div class="bar-fill" id="bar-middle-L" style="width:0%;background:#f1c40f"></div></div><span class="angle" id="angle-middle-L">-</span></div>
+            <div class="finger-bar"><span class="name">Ring</span><div class="bar"><div class="bar-fill" id="bar-ring-L" style="width:0%;background:#2ecc71"></div></div><span class="angle" id="angle-ring-L">-</span></div>
+            <div class="finger-bar"><span class="name">Pinky</span><div class="bar"><div class="bar-fill" id="bar-pinky-L" style="width:0%;background:#3498db"></div></div><span class="angle" id="angle-pinky-L">-</span></div>
         </div>
-        <div class="fps" id="fpsDisplay">FPS: -</div>
+
+        <div class="info-col">
+            <h2>Hand 2</h2>
+            <div class="finger-bar"><span class="name">Thumb</span><div class="bar"><div class="bar-fill" id="bar-thumb-R" style="width:0%;background:#e74c3c"></div></div><span class="angle" id="angle-thumb-R">-</span></div>
+            <div class="finger-bar"><span class="name">Index</span><div class="bar"><div class="bar-fill" id="bar-index-R" style="width:0%;background:#e67e22"></div></div><span class="angle" id="angle-index-R">-</span></div>
+            <div class="finger-bar"><span class="name">Middle</span><div class="bar"><div class="bar-fill" id="bar-middle-R" style="width:0%;background:#f1c40f"></div></div><span class="angle" id="angle-middle-R">-</span></div>
+            <div class="finger-bar"><span class="name">Ring</span><div class="bar"><div class="bar-fill" id="bar-ring-R" style="width:0%;background:#2ecc71"></div></div><span class="angle" id="angle-ring-R">-</span></div>
+            <div class="finger-bar"><span class="name">Pinky</span><div class="bar"><div class="bar-fill" id="bar-pinky-R" style="width:0%;background:#3498db"></div></div><span class="angle" id="angle-pinky-R">-</span></div>
+        </div>
+
+        <div class="info-col">
+            <h2>Status</h2>
+            <div class="status connected" id="status">Connecting...</div>
+            <div class="controls">
+                <button id="btnToggle" onclick="toggleCapture()">Stop</button>
+            </div>
+            <div class="fps" id="fpsDisplay">FPS: -</div>
+        </div>
     </div>
 </div>
 
