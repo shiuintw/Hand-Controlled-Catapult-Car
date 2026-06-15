@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
                 # Fire
                 r = web_server.get_latest()
-                if r['hands_detected'] and  (r['hands'][0]['gesture'] == 'point' or r['hands'][1]['gesture'] == 'point'):
+                if r['hands_detected'] and  r['hands'][0]['gesture'] == 'point':
                     sg90.fire()
 
             elif False: # disable
