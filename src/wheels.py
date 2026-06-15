@@ -82,7 +82,7 @@ def steer(angle, base_speed=80):
     ratio = abs(angle) / 90.0 if abs(angle) > DEAD_ZONE else 0
 
     # 對調：angle > 0 減左輪，angle < 0 減右輪
-    speed_l = max(0, min(100, spd * (1 - ratio) - 5)) if angle > DEAD_ZONE else max(0, min(100, spd - 5))
+    speed_l = max(0, min(100, spd * (1 - ratio))) if angle > DEAD_ZONE else max(0, min(100, spd))
     speed_r = max(0, min(100, spd * (1 - ratio))) if angle < -DEAD_ZONE else max(0, min(100, spd))
 
     pwm_a.ChangeDutyCycle(speed_l)
