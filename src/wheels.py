@@ -25,8 +25,8 @@ pwm_a.start(0)
 pwm_b.start(0)
 
 def set_speed(speed):
-    pwm_a.ChangeDutyCycle(max(0, speed - 5))
-    pwm_b.ChangeDutyCycle(speed)
+    pwm_a.ChangeDutyCycle(max(0, min(100, speed)))
+    pwm_b.ChangeDutyCycle(max(0, min(100, speed)))
 
 def forward(speed=100):
     set_speed(speed)
