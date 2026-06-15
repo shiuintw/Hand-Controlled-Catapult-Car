@@ -18,6 +18,11 @@ def set_angle(angle):
     time.sleep(0.5)
     pwm.ChangeDutyCycle(0)  # stop jitter
 
+def fire():
+    set_angle(170)
+    set_angle(90)
+    set_angle(170)
+
 def clean_up():
     pwm.stop()
     # GPIO.cleanup()

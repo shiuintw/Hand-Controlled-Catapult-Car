@@ -34,7 +34,12 @@ if __name__ == '__main__':
                     # Backward with steering
                     wheels.steer(angle, base_speed=speed)
 
-            else:
+                # Fire
+                r = web_server.get_latest()
+                if r['hands_detected'] and  (r['hands'][0]['gesture'] == 'point' or r['hands'][1]['gesture'] == 'point'):
+                    sg90.fire()
+
+            elif False: # disable
                 # No wheel or lever → gesture mode
                 r = web_server.get_latest()
                 if r['hands_detected']:
