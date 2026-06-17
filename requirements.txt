@@ -1,5 +1,15 @@
-mediapipe==0.10.14
+# ======================================================================
+# Raspberry Pi — full deployment (gesture + motors + servo + Pi camera)
+# Create the venv with system packages so picamera2 / RPi.GPIO are visible:
+#     python -m venv .venv --system-site-packages
+# Then: pip install -r requirements.txt
+# ======================================================================
+mediapipe==0.10.14      # hand landmark detection (provides mp.solutions API)
 tensorflow
-opencv-python
-flask
-numpy
+opencv-python           # frame decoding / color conversion
+flask                   # web server + MJPEG streaming
+numpy==1.26.4           # pinned: needed by mediapipe AND picamera2's simplejpeg (ABI)
+
+# --- Provided by Raspberry Pi OS, accessed via --system-site-packages ---
+# picamera2             # Pi camera (do NOT pip install; use system package)
+# RPi.GPIO              # GPIO / PWM control (system package)

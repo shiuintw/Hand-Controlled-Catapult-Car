@@ -1,7 +1,0 @@
-mediapipe==0.10.14
-tensorflow
-opencv-python
-flask
-numpy
-# picamera2
-RPi.GPIO
