@@ -19,7 +19,6 @@ def set_angle(angle):
     pwm.ChangeDutyCycle(0)  # stop jitter
 
 def fire():
-    set_angle(170)
     set_angle(90)
     set_angle(170)
 
